@@ -20,13 +20,14 @@ public class Task3Main extends ApplicationAdapter {
     private GlyphLayout layout;
     private BitmapFont font;
 
-    private Rectangle paddle;
+    private Rectangle paddle1;
+    private Rectangle paddle2;
 
     private Vector2 ballPosition;
     private Vector2 ballVelocity;
 
-    public static final float BALL_RADIUS = 20f;
-    public static final float PADDLE_WIDTH = 200f;
+    public static final float BALL_RADIUS = 15f;
+    public static final float PADDLE_WIDTH = 150f;
     public static final float PADDLE_HEIGHT = 20f;
     private static final float PADDLE_SPEED = 400f;
     private static final float PADDING = 20f;
@@ -39,9 +40,10 @@ public class Task3Main extends ApplicationAdapter {
         layout = new GlyphLayout();
         font = new BitmapFont();
 
-        paddle = new Rectangle(Gdx.graphics.getWidth() / 2f - PADDLE_WIDTH / 2f, PADDING, PADDLE_WIDTH, PADDLE_HEIGHT);
+        paddle1 = new Rectangle(Gdx.graphics.getWidth() / 2f - PADDLE_WIDTH / 2f, PADDING, PADDLE_WIDTH, PADDLE_HEIGHT);
+        paddle2 = new Rectangle(Gdx.graphics.getWidth() / 2f - PADDLE_WIDTH / 2f, Gdx.graphics.getHeight() - PADDLE_HEIGHT - PADDING, PADDLE_WIDTH, PADDLE_HEIGHT);
 
-        ballPosition = new Vector2(Gdx.graphics.getWidth() / 2f, PADDING + paddle.height);
+        ballPosition = new Vector2(Gdx.graphics.getWidth() / 2f, PADDING + paddle1.height);
         ballVelocity = new Vector2(200, 200);   // x and y speed
     }
 
@@ -56,8 +58,10 @@ public class Task3Main extends ApplicationAdapter {
         renderer.begin(ShapeRenderer.ShapeType.Filled);
         renderer.setColor(Color.WHITE);
         renderer.circle(ballPosition.x, ballPosition.y, BALL_RADIUS);
-        renderer.setColor(Color.GREEN);
-        renderer.rect(paddle.x, paddle.y, paddle.width, paddle.height);
+        renderer.setColor(Color.RED);
+        renderer.rect(paddle1.x, paddle1.y, paddle1.width, paddle1.height);
+        renderer.setColor(Color.BLUE);
+        renderer.rect(paddle2.x, paddle2.y, paddle2.width, paddle2.height);
         renderer.end();
 
         batch.begin();
@@ -74,16 +78,29 @@ public class Task3Main extends ApplicationAdapter {
     }
 
     private void handlePaddleInput() {
+        //input for paddle 1
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            paddle.x -= PADDLE_SPEED * Gdx.graphics.getDeltaTime();
+            paddle1.x -= PADDLE_SPEED * Gdx.graphics.getDeltaTime();
         }
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            paddle.x += PADDLE_SPEED * Gdx.graphics.getDeltaTime();
+            paddle1.x += PADDLE_SPEED * Gdx.graphics.getDeltaTime();
         }
 
-        if (paddle.x < 0) paddle.x = 0;
-        if (paddle.x > Gdx.graphics.getWidth() - paddle.width)
-            paddle.x = Gdx.graphics.getWidth() - paddle.width;
+        if (paddle1.x < 0) paddle1.x = 0;
+        if (paddle1.x > Gdx.graphics.getWidth() - paddle1.width)
+            paddle1.x = Gdx.graphics.getWidth() - paddle1.width;
+
+        //input for paddle 2
+        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+            paddle2.x -= PADDLE_SPEED * Gdx.graphics.getDeltaTime();
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+            paddle2.x += PADDLE_SPEED * Gdx.graphics.getDeltaTime();
+        }
+
+        if (paddle2.x < 0) paddle2.x = 0;
+        if (paddle2.x > Gdx.graphics.getWidth() - paddle2.width)
+            paddle2.x = Gdx.graphics.getWidth() - paddle2.width;
     }
 
     private void updateBallPosition() {
@@ -92,19 +109,22 @@ public class Task3Main extends ApplicationAdapter {
         ballPosition.y += ballVelocity.y * deltaTime;
         ballPosition.x += ballVelocity.x * deltaTime;
 
-        if (ballPosition.y > Gdx.graphics.getHeight() - BALL_RADIUS) {
-            ballVelocity.y = -ballVelocity.y;
-        }
-
         if (ballPosition.x - BALL_RADIUS < 0 || ballPosition.x + BALL_RADIUS > Gdx.graphics.getWidth()) {
             ballVelocity.x = -ballVelocity.x;
         }
 
-        if (ballPosition.y - BALL_RADIUS < paddle.y + paddle.height
-            && ballPosition.x > paddle.x && ballPosition.x < paddle.x + paddle.width) {
+        if (ballPosition.y - BALL_RADIUS < paddle1.y + paddle1.height
+            && ballPosition.x > paddle1.x && ballPosition.x < paddle1.x + paddle1.width) {
             ballVelocity.y = -ballVelocity.y;
-            ballPosition.y = paddle.y + paddle.height + BALL_RADIUS; // avoid getting stuck
+            ballPosition.y = paddle1.y + paddle1.height + BALL_RADIUS; // avoid getting stuck
         }
+
+        if (ballPosition.y + BALL_RADIUS > paddle2.y
+            && ballPosition.x > paddle2.x && ballPosition.x < paddle2.x + paddle2.width) {
+            ballVelocity.y = -ballVelocity.y;
+            ballPosition.y = paddle2.y - BALL_RADIUS; // avoid getting stuck
+        }
+
     }
 
     @Override
